@@ -22,7 +22,7 @@ def get_db_connection():
         password=url.password,
         host=url.hostname,
         port=url.port,
-        ssl_context=pg8000.ssl.create_default_context()  # Create default SSL context
+        ssl=True  # Enable SSL connection
     )
     return connection
 
