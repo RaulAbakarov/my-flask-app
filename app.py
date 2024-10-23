@@ -1,17 +1,17 @@
 from flask import Flask, request, jsonify, render_template
 import os
-import psycopg2
+import pg8000
 from urllib.parse import urlparse
 
 app = Flask(__name__)
 
 # Get database URL from environment variables
-DATABASE_URL = os.getenv('postgres://default:VIlNZBpO64SR@ep-restless-hill-a4xtls9n-pooler.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require')
+DATABASE_URL = os.getenv('postgres://default:VIlNZBpO64SR@ep-restless-hill-a4xtls9n-pooler.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require')  # Make sure your environment variable is correctly set
 
 # Connect to your database
 def get_db_connection():
     url = urlparse(DATABASE_URL)
-    connection = psycopg2.connect(
+    connection = pg8000.connect(
         database=url.path[1:],
         user=url.username,
         password=url.password,
