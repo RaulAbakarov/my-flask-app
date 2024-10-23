@@ -22,7 +22,7 @@ def get_db_connection():
         password=url.password,
         host=url.hostname,
         port=url.port,
-        ssl=True  # Enable SSL connection
+        ssl_context=None  # No need for custom SSL context if using default settings
     )
     return connection
 
