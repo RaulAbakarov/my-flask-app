@@ -6,18 +6,6 @@
     <title>Login Page</title>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const deviceData = {
-                userAgent: navigator.userAgent,
-                language: navigator.language,
-            };
-            fetch('/collect-data', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(deviceData),
-            });
-
             document.getElementById('login-form').onsubmit = function(event) {
                 event.preventDefault();
                 const username = document.getElementById('username').value;
