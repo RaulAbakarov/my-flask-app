@@ -7,23 +7,22 @@ app = Flask(__name__)
 # Hardcoded database URL for demonstration
 DATABASE_URL = 'postgres://default:VIlNZBpO64SR@ep-restless-hill-a4xtls9n-pooler.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require'
 
-print(f"DATABASE_URL: {DATABASE_URL}")  # Debugging line
-
 # Connect to your database
 def get_db_connection():
     url = urlparse(DATABASE_URL)
-    print(f"Parsed URL: {url}")  # Debugging line
 
     # Check parsed URL components
     if not url.username or not url.password or not url.hostname or not url.port or not url.path:
         raise ValueError("Database connection parameters are missing from DATABASE_URL.")
 
+    # Connect to the PostgreSQL database using pg8000
     connection = pg8000.connect(
         database=url.path[1:],  # Remove leading '/'
         user=url.username,
         password=url.password,
         host=url.hostname,
-        port=url.port
+        port=url.port,
+        ssl=True  # Enable SSL connection
     )
     return connection
 
